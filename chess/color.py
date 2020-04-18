@@ -5,31 +5,31 @@ class Color(Enum):
     The `Color` class represents one of the two colors (`Black` or `White`)
     used in the game of Chess.
     """
-    WHITE = 1
-    BLACK = 8
+    White = 1
+    Black = 8
 
     def other(self):
         """
         Returns the opposite color.
 
-        >>> Color.WHITE.other()
-        <Color.BLACK: 8>
-        >>> Color.BLACK.other()
-        <Color.WHITE: 1>
+        >>> Color.White.other()
+        <Color.Black: 8>
+        >>> Color.Black.other()
+        <Color.White: 1>
         """
-        if self == Color.WHITE:
-            return Color.BLACK
-        elif self == Color.BLACK:
-            return Color.WHITE
+        if self == Color.White:
+            return Color.Black
+        elif self == Color.Black:
+            return Color.White
 
     def first_row(self):
         """
         Returns the coordinate of the first row
         from the point of view of a player who plays the given color.
 
-        >>> Color.WHITE.first_row()
+        >>> Color.White.first_row()
         1
-        >>> Color.BLACK.first_row()
+        >>> Color.Black.first_row()
         8
         """
         return self.value
