@@ -1,8 +1,4 @@
-if __name__ == "__main__":
-    from color import Color
-else:
-    from chess.color import Color
-
+from color import Color
 from enum import Enum, auto
     
 class FigureType(Enum):
