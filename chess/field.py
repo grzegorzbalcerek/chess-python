@@ -31,12 +31,10 @@ class Field:
         """
         return chr(self.col + ord('a') - 1) + str(self.row)
 
+
     def __repr__(self):
-        """
-        >>> Field(6,7)
-        Field(6,7)
-        """
-        return "Field({},{})".format(self.col, self.row)
+        return str(self)
+
 
     def relative(self, c, r):
         """
