@@ -1,6 +1,7 @@
 from color import Color
 from figure import Figure, FigureType
 from field import Field
+from move import Move, MoveType
 
 def starting_board():
     return {
@@ -57,37 +58,117 @@ def show_board(board):
     def row_to_str(row):
         return "".join([str(board.get((col,row), ".")) for col in range(1,9)])
     return (" abcdefgh\n" +
-        "".join([ (str(row) + row_to_str(row) + str(row) + "\n") for row in range(8,0,-1)]) +
-        " abcdefgh")
+            "".join([ (str(row) + row_to_str(row) + str(row) + "\n") for row in range(8,0,-1)]) +
+            " abcdefgh")
+
+
+def update_board(board, move):
+    """
+    Returns a new board, updated with a move.
+
+    >>> print(show_board(update_board(starting_board(), Move(MoveType.RegularMove, Field(2,2), Field(2,3)))))
+     abcdefgh
+    8RNBQKBNR8
+    7PPPPPPPP7
+    6........6
+    5........5
+    4........4
+    3.p......3
+    2p.pppppp2
+    1rnbqkbnr1
+     abcdefgh
+
+    >>> print(show_board(update_board(starting_board(), Move(MoveType.RegularMove, Field(3,3), Field(2,3)))))
+     abcdefgh
+    8RNBQKBNR8
+    7PPPPPPPP7
+    6........6
+    5........5
+    4........4
+    3........3
+    2pppppppp2
+    1rnbqkbnr1
+     abcdefgh
+
+    >>> print(show_board(update_board(starting_board(), Move(MoveType.PromotionMove, Field(2,2), Field(2,8), figure=Figure(FigureType.Queen, Color.White)))))
+     abcdefgh
+    8RqBQKBNR8
+    7PPPPPPPP7
+    6........6
+    5........5
+    4........4
+    3........3
+    2p.pppppp2
+    1rnbqkbnr1
+     abcdefgh
+
+    >>> print(show_board(update_board(starting_board(), Move(MoveType.EnPassantMove, Field(2,2), Field(3,3), captured=Field(3,7)))))
+     abcdefgh
+    8RNBQKBNR8
+    7PP.PPPPP7
+    6........6
+    5........5
+    4........4
+    3..p.....3
+    2p.pppppp2
+    1rnbqkbnr1
+     abcdefgh
+
+    >>> print(show_board(update_board(starting_board(), Move(MoveType.CastlingMove, Field(5,1), Field(3,1), rook_from=Field(1,1), rook_to=Field(4,1)))))
+     abcdefgh
+    8RNBQKBNR8
+    7PPPPPPPP7
+    6........6
+    5........5
+    4........4
+    3........3
+    2pppppppp2
+    1.nkr.bnr1
+     abcdefgh
+    """
+    from_key = (move.frm.col, move.frm.row)
+    to_key = (move.to.col, move.to.row)
+    if move.type == MoveType.RegularMove:
+        if (from_key in board):
+            new_board = board.copy()
+            new_board[to_key] = new_board[from_key]
+            del new_board[from_key]
+            return new_board
+        else:
+            return board.copy()
+    elif move.type == MoveType.PromotionMove:
+        if (from_key in board):
+            new_board = board.copy()
+            new_board[to_key] = move.data['figure']
+            del new_board[from_key]
+            return new_board
+        else:
+            return board.copy()
+    elif move.type == MoveType.EnPassantMove:
+        if (from_key in board):
+            captured_key = (move.data['captured'].col, move.data['captured'].row)
+            new_board = board.copy()
+            new_board[to_key] = new_board[from_key]
+            del new_board[from_key]
+            del new_board[captured_key]
+            return new_board
+        else:
+            return board.copy()
+    elif move.type == MoveType.CastlingMove:
+        rook_from_key = (move.data['rook_from'].col, move.data['rook_from'].row)
+        if (from_key in board and rook_from_key in board):
+            rook_to_key = (move.data['rook_to'].col, move.data['rook_to'].row)
+            new_board = board.copy()
+            new_board[to_key] = new_board[from_key]
+            new_board[rook_to_key] = new_board[rook_from_key]
+            del new_board[from_key]
+            del new_board[rook_from_key]
+            return new_board
+        else:
+            return board.copy()
+
 
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
 
-#  /**
-#    * Returns a new board, updated with a move.
-#    */
-#  def updateBoard(board: Board, move: Move): Board = move match {
-#    case RegularMove(from,to) =>
-#      board.get(from).fold(board)( figure =>
-#        board - from + (to->figure))
-#    case PromotionMove(from,to,figure) =>
-#      board.get(from).fold(board)( _ =>
-#        board - from + (to->figure))
-#    case EnPassantMove(from,to,captured) =>
-#      board.get(from).fold(board)( figure =>
-#        board - from - captured + (to->figure))
-#    case CastlingMove(from,to,rookFrom,rookTo) =>
-#      (board.get(from), board.get(rookFrom)) match {
-#        case (Some(figure),Some(rookFigure)) =>
-#          board - from + (to->figure) - rookFrom + (rookTo->rookFigure)
-#        case _ => board
-#      }
-#  }
-#}
-#
-#showBoard(updateBoard(startingBoard,RegularMove(Field(2,2),Field(2,3))))
-#showBoard(updateBoard(startingBoard,RegularMove(Field(3,3),Field(2,3))))
-#showBoard(updateBoard(startingBoard,PromotionMove(Field(2,2),Field(2,8),Figure(Queen,White))))
-#showBoard(updateBoard(startingBoard,EnPassantMove(Field(2,2),Field(3,3),Field(3,7))))
-#showBoard(updateBoard(startingBoard,CastlingMove(Field(5,1),Field(3,1),Field(1,1),Field(4,1))))
